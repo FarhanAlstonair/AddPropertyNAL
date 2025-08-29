@@ -1254,7 +1254,7 @@ function renderFilteredProperties(filteredProperties) {
                         </button>` : ''}
                     <button class="btn btn--sm btn--outline" onclick="editProperty('${property.id}')">Edit</button>
                     <button class="btn-icon delete" id="delete-btn" onclick="showDeleteModal('${property.id}')" title="Delete">
-                        
+                        Delete
                     </button>
                 </div>
             </div>
