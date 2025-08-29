@@ -32,7 +32,7 @@ const sampleProperties = [
         status: "active",
         badges: ["SALE", "ACTIVE", "URGENT SALE", "BIDDING"],
         biddingEnabled: true,
-        biddingHistory: false,
+        biddingHistory: true,
         urgentSale: true,
         isDraft: false,
         listingIntent: "urgent-sale",
@@ -328,6 +328,8 @@ function generateBadges(property) {
     if (property.biddingEnabled) badges.push('<span class="property-badge badge-bidding">BIDDING</span>');
     if (property.status === 'draft') badges.push('<span class="property-badge badge-draft">DRAFT</span>');
     if (property.status === 'sold') badges.push('<span class="property-badge badge-sold">SOLD</span>');
+    if (property.status === 'sold' && property.biddingHistory) badges.push('<span class="property-badge badge-bidding-history">BIDDING</span>');
+
 
     return badges.join('');
 }
@@ -403,12 +405,14 @@ function renderBiddingDashboard() {
 
             showToast('Bidding has ended! Property status updated.', 'success');
 
-            if (currentBiddingProperty) {
-                currentBiddingProperty.status = 'sold';
-                currentBiddingProperty.biddingEnabled = false;
-                saveProperties();
-                renderPropertiesGrid();
-            }
+           if (currentBiddingProperty) {
+    currentBiddingProperty.status = 'sold';  // or only if actual sale confirmed
+    currentBiddingProperty.biddingEnabled = false;
+    currentBiddingProperty.biddingHistory = true;  // mark bidding has occurred
+    saveProperties();
+    renderPropertiesGrid();
+}
+
             return;
         }
 
