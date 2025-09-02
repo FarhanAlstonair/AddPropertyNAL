@@ -45,7 +45,11 @@ const AddProperty: React.FC = () => {
       videos: [],
       documents: [],
       requiredDocuments: [],
-      biddingEnabled: false
+      biddingEnabled: false,
+      state: '',
+      pincode: '',
+      landmark: '',
+      termsAccepted: false
     }
   });
 

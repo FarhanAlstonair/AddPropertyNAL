@@ -47,7 +47,11 @@ const EditProperty: React.FC = () => {
       videos: [],
       documents: [],
       requiredDocuments: [],
-      biddingEnabled: false
+      biddingEnabled: false,
+      state: '',
+      pincode: '',
+      landmark: '',
+      termsAccepted: false
     }
   });
 
@@ -66,6 +70,10 @@ const EditProperty: React.FC = () => {
       methods.setValue('description', property.description);
       methods.setValue('biddingEnabled', property.biddingEnabled || false);
       methods.setValue('coordinates', property.coordinates);
+      methods.setValue('state', property.state || '');
+      methods.setValue('pincode', property.pincode || '');
+      methods.setValue('landmark', property.landmark || '');
+      methods.setValue('termsAccepted', true); // Already accepted in original submission
     }
   }, [property, methods]);
 

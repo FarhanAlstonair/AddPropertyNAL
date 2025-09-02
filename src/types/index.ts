@@ -6,16 +6,21 @@ export interface Property {
   bhk: string;
   address: string;
   city: string;
+  state: string;
+  pincode: string;
+  landmark: string;
   area: number;
   price: number;
   listingIntent: 'rent' | 'sale' | 'urgent-sale';
-  status: 'active' | 'sold' | 'rented';
+  status: 'active' | 'sold' | 'rented' | 'draft';
   amenities: string[];
   images: string[];
   videos?: string[];
   description: string;
   biddingEnabled?: boolean;
   coordinates?: { lat: number; lng: number };
+  views?: number;
+  inquiries?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -27,6 +32,9 @@ export interface PropertyFormData {
   bhk: string;
   address: string;
   city: string;
+  state: string;
+  pincode: string;
+  landmark: string;
   area: number;
   price: number;
   listingIntent: 'rent' | 'sale' | 'urgent-sale';
@@ -35,9 +43,10 @@ export interface PropertyFormData {
   images: File[];
   videos: File[];
   documents: File[];
-  requiredDocuments: File[];
+  requiredDocuments: { file: File; type: string; customType?: string }[];
   biddingEnabled: boolean;
   coordinates?: { lat: number; lng: number };
+  termsAccepted: boolean;
 }
 
 // Filter Types

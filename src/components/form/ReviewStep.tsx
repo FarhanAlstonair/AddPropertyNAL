@@ -7,7 +7,7 @@ interface ReviewStepProps extends FormStepProps {
 }
 
 const ReviewStep: React.FC<ReviewStepProps> = ({ onPrev, onSubmit, isFirst, isLast }) => {
-  const { watch, handleSubmit } = useFormContext<PropertyFormData>();
+  const { watch, handleSubmit, register, formState: { errors } } = useFormContext<PropertyFormData>();
   const formData = watch();
 
   const formatPrice = (price: number, intent: string) => {
@@ -177,15 +177,19 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ onPrev, onSubmit, isFirst, isLa
           <div className="flex items-start">
             <input
               type="checkbox"
-              id="terms"
-              className="mt-1 mr-3"
-              required
+              {...register('termsAccepted', { required: 'You must accept the terms and conditions' })}
+              className="mt-1 mr-3 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
             />
-            <label htmlFor="terms" className="text-sm text-blue-900">
-              I confirm that all the information provided is accurate and I agree to the{' '}
-              <a href="#" className="text-blue-700 underline">Terms and Conditions</a> and{' '}
-              <a href="#" className="text-blue-700 underline">Privacy Policy</a>.
-            </label>
+            <div>
+              <label className="text-sm text-blue-900">
+                I confirm that all the information provided is accurate and I agree to the{' '}
+                <a href="#" className="text-blue-700 underline">Terms and Conditions</a> and{' '}
+                <a href="#" className="text-blue-700 underline">Privacy Policy</a>.
+              </label>
+              {errors.termsAccepted && (
+                <p className="mt-1 text-sm text-red-600">{errors.termsAccepted.message}</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -209,7 +213,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ onPrev, onSubmit, isFirst, isLa
           <button
             type="button"
             onClick={handleSubmit(onSubmit)}
-            disabled={!formData.requiredDocuments || formData.requiredDocuments.length < 3}
+            disabled={!formData.requiredDocuments || formData.requiredDocuments.length < 3 || !formData.termsAccepted}
             className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Submit Property

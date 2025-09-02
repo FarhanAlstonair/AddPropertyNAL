@@ -39,7 +39,7 @@ const IntentStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast }
                 type="radio"
                 value="sale"
                 {...register('listingIntent', { required: 'Please select listing intent' })}
-                className="sr-only"
+                className="sr-only peer"
               />
               <div className="border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-primary transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white">
                 <div className="flex items-center justify-center mb-3">
@@ -59,7 +59,7 @@ const IntentStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast }
                 type="radio"
                 value="rent"
                 {...register('listingIntent', { required: 'Please select listing intent' })}
-                className="sr-only"
+                className="sr-only peer"
               />
               <div className="border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-primary transition-colors peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white">
                 <div className="flex items-center justify-center mb-3">
@@ -79,7 +79,7 @@ const IntentStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast }
                 type="radio"
                 value="urgent-sale"
                 {...register('listingIntent', { required: 'Please select listing intent' })}
-                className="sr-only"
+                className="sr-only peer"
               />
               <div className="border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-primary transition-colors peer-checked:border-primary peer-checked:bg-red-600 peer-checked:text-white">
                 <div className="flex items-center justify-center mb-3">

@@ -35,7 +35,7 @@ const PropertyDetails: React.FC = () => {
     if (intent === 'rent') {
       return `₹${price.toLocaleString()}/month`;
     }
-    return `₹${(price / 100000).toFixed(1)} Lakhs`;
+    return `₹${(price / 100000).toFixed(1)}L`;
   };
 
   const getStatusColor = (status: string) => {
@@ -85,9 +85,9 @@ const PropertyDetails: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-0">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {/* Image Carousel */}
             <ImageCarousel images={selectedProperty.images} title={selectedProperty.title} />
 
@@ -179,53 +179,97 @@ const PropertyDetails: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Location Map */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-6">
-              <h3 className="text-lg font-semibold text-text-primary mb-4">Location</h3>
+          <div className="lg:col-span-2 lg:pl-6">
+            {/* Google Maps - Premium Container */}
+            <div className="border border-gray-200 rounded-lg shadow-sm overflow-hidden sticky top-6">
               <GoogleMap 
-                coordinates={selectedProperty.coordinates}
                 address={selectedProperty.address}
-                className="w-full h-64 mb-4"
+                coordinates={selectedProperty.coordinates}
+                height="450px"
               />
               
-              <div className="text-center mb-4">
-                <div className="text-2xl font-bold text-primary mb-2">
-                  {formatPrice(selectedProperty.price, selectedProperty.listingIntent)}
-                </div>
-                <div className="text-text-muted">
-                  {selectedProperty.listingIntent === 'rent' ? 'Monthly Rent' : selectedProperty.listingIntent === 'urgent-sale' ? 'Urgent Sale Price' : 'Sale Price'}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <button className="w-full bg-primary text-white py-3 rounded-lg hover:bg-opacity-90 transition-colors font-medium">
-                  Contact Owner
-                </button>
-                <button className="w-full border border-primary text-primary py-3 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium">
-                  Schedule Visit
-                </button>
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="text-sm text-text-muted space-y-2">
-                  <div className="flex justify-between">
-                    <span>Listed on:</span>
-                    <span>{new Date(selectedProperty.createdAt).toLocaleDateString()}</span>
+              <div className="p-6 bg-white">
+                <div className="text-center mb-4">
+                  <div className="text-2xl font-bold text-primary mb-2">
+                    {formatPrice(selectedProperty.price, selectedProperty.listingIntent)}
                   </div>
-                  <div className="flex justify-between">
-                    <span>Last updated:</span>
-                    <span>{new Date(selectedProperty.updatedAt).toLocaleDateString()}</span>
+                  <div className="text-text-muted">
+                    {selectedProperty.listingIntent === 'rent' ? 'Monthly Rent' : selectedProperty.listingIntent === 'urgent-sale' ? 'Urgent Sale Price' : 'Sale Price'}
                   </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <button 
+                    onClick={() => {
+                      const coords = selectedProperty.coordinates;
+                      const url = coords 
+                        ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
+                        : `https://www.google.com/maps/search/${encodeURIComponent(selectedProperty.address + ', ' + selectedProperty.city)}`;
+                      window.open(url, '_blank');
+                    }}
+                    className="w-full px-4 py-2 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors font-medium flex items-center justify-center gap-2"
+                  >
+                    View Location on Google Maps
+                  </button>
                   {selectedProperty.biddingEnabled && (
-                    <div className="flex justify-between">
-                      <span>Bidding:</span>
-                      <span className="text-green-600 font-medium">Enabled</span>
-                    </div>
+                    <button 
+                      onClick={() => navigate(`/bidding/${selectedProperty.id}`)}
+                      className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                    >
+                      Manage Bids
+                    </button>
                   )}
+                </div>
+
+                {/* Property Insights */}
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h4 className="font-medium text-text-primary mb-3">Property Insights</h4>
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="p-3 bg-background-light rounded-lg">
+                      <div className="text-xl font-bold text-primary">{selectedProperty.views || 0}</div>
+                      <div className="text-xs text-text-muted">Views</div>
+                    </div>
+                    <div className="p-3 bg-background-light rounded-lg">
+                      <div className="text-xl font-bold text-primary">{selectedProperty.inquiries || 0}</div>
+                      <div className="text-xs text-text-muted">Inquiries</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="text-sm text-text-muted space-y-2">
+                    <div className="flex justify-between">
+                      <span>Listed on:</span>
+                      <span>{new Date(selectedProperty.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Last updated:</span>
+                      <span>{new Date(selectedProperty.updatedAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Status:</span>
+                      <span className={`font-medium capitalize ${
+                        selectedProperty.status === 'active' ? 'text-green-600' :
+                        selectedProperty.status === 'sold' ? 'text-blue-600' :
+                        selectedProperty.status === 'rented' ? 'text-purple-600' :
+                        'text-gray-600'
+                      }`}>
+                        {selectedProperty.status}
+                      </span>
+                    </div>
+                    {selectedProperty.biddingEnabled && (
+                      <div className="flex justify-between">
+                        <span>Bidding:</span>
+                        <span className="text-green-600 font-medium">Enabled</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
+
+
           </div>
         </div>
 

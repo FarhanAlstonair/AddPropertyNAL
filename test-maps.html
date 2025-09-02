@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps Test</title>
+</head>
+<body>
+    <div id="map" style="height: 400px; width: 100%;"></div>
+    
+    <script>
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 13,
+                center: { lat: 12.9716, lng: 77.5946 }, // Bengaluru
+            });
+            
+            new google.maps.Marker({
+                position: { lat: 12.9716, lng: 77.5946 },
+                map: map,
+                title: "Bengaluru"
+            });
+            
+            console.log("Google Maps loaded successfully!");
+        }
+        
+        function handleError() {
+            console.error("Failed to load Google Maps");
+            document.getElementById("map").innerHTML = 
+                '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f0f0f0; border: 2px dashed #ccc;">' +
+                '<div style="text-align: center; color: #666;">' +
+                '<h3>Map Unavailable</h3>' +
+                '<p>Google Maps could not be loaded</p>' +
+                '</div></div>';
+        }
+    </script>
+    
+    <script async defer 
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzuZOfg_75S4Vslats3CcoKtBzNlO3gTM&callback=initMap"
+        onerror="handleError()">
+    </script>
+</body>
+</html>

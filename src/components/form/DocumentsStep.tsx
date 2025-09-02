@@ -4,34 +4,108 @@ import { PropertyFormData, FormStepProps } from '../../types';
 
 const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast }) => {
   const { setValue, watch, trigger, formState: { errors } } = useFormContext<PropertyFormData>();
-  const [requiredDocuments, setRequiredDocuments] = useState<File[]>([]);
+  const [requiredDocuments, setRequiredDocuments] = useState<{ file: File; type: string; customType?: string }[]>([]);
   const [documents, setDocuments] = useState<File[]>([]);
+  const [selectedDocType, setSelectedDocType] = useState('');
+  const [customDocType, setCustomDocType] = useState('');
+  const [uploadError, setUploadError] = useState('');
 
   const requiredDocTypes = [
     'Property ownership documents',
     'Building approvals and permits', 
     'Property tax receipts',
     'NOC certificates',
-    'Floor plans or blueprints'
+    'Floor plans or blueprints',
+    'Other (custom)'
   ];
 
   const handleRequiredFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError('');
+    
+    if (!selectedDocType) {
+      setUploadError('Please select a document type first');
+      return;
+    }
+    
     const files = Array.from(e.target.files || []);
-    const newDocs = [...requiredDocuments, ...files];
-    setRequiredDocuments(newDocs);
-    setValue('requiredDocuments', newDocs);
+    const docType = selectedDocType === 'Other (custom)' ? customDocType : selectedDocType;
+    
+    if (selectedDocType === 'Other (custom)' && !customDocType.trim()) {
+      setUploadError('Please specify the custom document type');
+      return;
+    }
+    
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const oversizedFiles = files.filter(file => file.size > maxSize);
+    if (oversizedFiles.length > 0) {
+      setUploadError(`File size must be under 10MB. ${oversizedFiles[0].name} is too large.`);
+      return;
+    }
+    
+    // Check if document type already exists
+    const typeExists = requiredDocuments.some(doc => doc.type === docType);
+    if (typeExists) {
+      setUploadError('This document type has already been uploaded');
+      return;
+    }
+    
+    const newDocs = files.map(file => ({
+      file,
+      type: docType,
+      customType: selectedDocType === 'Other (custom)' ? customDocType : undefined
+    }));
+    
+    const updatedDocs = [...requiredDocuments, ...newDocs];
+    setRequiredDocuments(updatedDocs);
+    setValue('requiredDocuments', updatedDocs);
+    
+    // Reset selections
+    setSelectedDocType('');
+    setCustomDocType('');
+    e.target.value = '';
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setDocuments(prev => [...prev, ...files]);
-    setValue('documents', [...documents, ...files]);
+    
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const validFiles = files.filter(file => file.size <= maxSize);
+    const oversizedFiles = files.filter(file => file.size > maxSize);
+    
+    if (oversizedFiles.length > 0) {
+      setUploadError(`${oversizedFiles.length} file(s) exceed 10MB limit and were skipped.`);
+    }
+    
+    if (validFiles.length > 0) {
+      const updatedDocuments = [...documents, ...validFiles];
+      setDocuments(updatedDocuments);
+      setValue('documents', updatedDocuments);
+    }
   };
 
   const removeRequiredDocument = (index: number) => {
     const newDocs = requiredDocuments.filter((_, i) => i !== index);
     setRequiredDocuments(newDocs);
     setValue('requiredDocuments', newDocs);
+    setUploadError(''); // Clear any errors when removing documents
+  };
+
+  const getUploadedTypes = () => {
+    const types = new Set(requiredDocuments.map(doc => doc.type));
+    return Array.from(types);
+  };
+
+  const getAvailableDocTypes = () => {
+    const uploadedTypes = getUploadedTypes();
+    return requiredDocTypes.filter(type => !uploadedTypes.includes(type));
+  };
+
+  const hasAllRequiredTypes = () => {
+    const uploadedTypes = getUploadedTypes();
+    const coreTypes = requiredDocTypes.slice(0, -1); // Exclude 'Other (custom)'
+    return coreTypes.filter(type => uploadedTypes.includes(type)).length >= 3;
   };
 
   const removeDocument = (index: number) => {
@@ -41,8 +115,7 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
   };
 
   const handleNext = async () => {
-    const isValid = await trigger(['requiredDocuments']);
-    if (isValid && requiredDocuments.length >= 3) {
+    if (hasAllRequiredTypes() || requiredDocuments.length >= 3) {
       onNext();
     }
   };
@@ -60,42 +133,96 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
           <h3 className="text-lg font-semibold text-text-primary mb-4">Required Documents *</h3>
           <p className="text-sm text-text-muted mb-4">Upload at least 3 of the following documents (mandatory):</p>
           
-          <div className="border-2 border-dashed border-red-300 rounded-lg p-6 text-center hover:border-red-400 transition-colors">
-            <input
-              type="file"
-              multiple
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-              onChange={handleRequiredFileChange}
-              className="hidden"
-              id="required-documents-upload"
-            />
-            <label htmlFor="required-documents-upload" className="cursor-pointer">
-              <svg className="mx-auto w-10 h-10 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <div className="text-base font-medium text-red-700 mb-1">
-                Upload Required Documents
+          {/* Document Type Selection */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                Select Document Type
+              </label>
+              <select
+                value={selectedDocType}
+                onChange={(e) => {
+                  setSelectedDocType(e.target.value);
+                  setUploadError('');
+                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              >
+                <option value="">Choose document type...</option>
+                {getAvailableDocTypes().map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Custom Document Type Input */}
+            {selectedDocType === 'Other (custom)' && (
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Specify Document Type
+                </label>
+                <input
+                  type="text"
+                  value={customDocType}
+                  onChange={(e) => setCustomDocType(e.target.value)}
+                  placeholder="Enter document type..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
               </div>
-              <div className="text-sm text-red-600">
-                PDF, DOC, DOCX, JPG, PNG files up to 10MB each
+            )}
+
+            {/* File Upload */}
+            <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+              selectedDocType && (selectedDocType !== 'Other (custom)' || customDocType.trim())
+                ? 'border-red-300 hover:border-red-400 cursor-pointer'
+                : 'border-gray-200 cursor-not-allowed opacity-50'
+            }`}>
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                onChange={handleRequiredFileChange}
+                className="hidden"
+                id="required-documents-upload"
+                disabled={!selectedDocType || (selectedDocType === 'Other (custom)' && !customDocType.trim())}
+              />
+              <label 
+                htmlFor="required-documents-upload" 
+                className={selectedDocType && (selectedDocType !== 'Other (custom)' || customDocType.trim()) ? 'cursor-pointer' : 'cursor-not-allowed'}
+              >
+                <svg className="mx-auto w-10 h-10 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <div className="text-base font-medium text-red-700 mb-1">
+                  {selectedDocType ? `Upload ${selectedDocType === 'Other (custom)' ? customDocType || 'Custom Document' : selectedDocType}` : 'Select document type first'}
+                </div>
+                <div className="text-sm text-red-600">
+                  PDF, DOC, DOCX, JPG, PNG files up to 10MB each
+                </div>
+              </label>
+            </div>
+
+            {/* Upload Error */}
+            {uploadError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800">{uploadError}</p>
               </div>
-            </label>
+            )}
           </div>
 
           {requiredDocuments.length > 0 && (
             <div className="mt-4">
               <h4 className="font-medium text-text-primary mb-3">Required Documents ({requiredDocuments.length})</h4>
               <div className="space-y-2">
-                {requiredDocuments.map((file, index) => (
+                {requiredDocuments.map((doc, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
                     <div className="flex items-center">
                       <svg className="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       <div>
-                        <div className="font-medium text-text-primary">{file.name}</div>
+                        <div className="font-medium text-text-primary">{doc.file.name}</div>
                         <div className="text-sm text-text-muted">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                          {doc.type} • {(doc.file.size / 1024 / 1024).toFixed(2)} MB
                         </div>
                       </div>
                     </div>
@@ -207,7 +334,7 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
         <button
           type="button"
           onClick={handleNext}
-          disabled={requiredDocuments.length < 3}
+          disabled={!hasAllRequiredTypes() && requiredDocuments.length < 3}
           className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Next: Intent

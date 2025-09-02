@@ -12,14 +12,75 @@ const BiddingManagement: React.FC = () => {
   const [biddingSession, setBiddingSession] = useState<BiddingSession | null>(null);
   const [timeLeft, setTimeLeft] = useState('');
   const [selectedBidder, setSelectedBidder] = useState<string | null>(null);
+  const [showEndedOverlay, setShowEndedOverlay] = useState(false);
+  const [acknowledged, setAcknowledged] = useState(false);
 
   const property = properties.find(p => p.id === id);
 
   useEffect(() => {
-    if (id && mockBiddingSessions[id]) {
-      setBiddingSession(mockBiddingSessions[id]);
+    if (id) {
+      // Check if bidding session exists, if not create a mock one
+      if (mockBiddingSessions[id]) {
+        setBiddingSession(mockBiddingSessions[id]);
+      } else if (property?.biddingEnabled) {
+        // Create a mock bidding session for properties with bidding enabled
+        const mockSession: BiddingSession = {
+          id: id,
+          propertyId: id,
+          status: 'active',
+          startTime: new Date(Date.now() - 300000).toISOString(), // Started 5 minutes ago
+          endTime: new Date(Date.now() + 10000).toISOString(), // Ends in 10 seconds
+          minBidAmount: property.price + 50000,
+          bidIncrement: 25000,
+          bids: [
+            {
+              id: '1',
+              bidderId: 'bidder1',
+              amount: property.price + 100000,
+              timestamp: new Date(Date.now() - 180000).toISOString(),
+              status: 'active' as const,
+              bidder: {
+                id: 'bidder1',
+                name: 'Rajesh Kumar',
+                email: 'rajesh@example.com',
+                phone: '+91 98765 43210',
+                verified: true
+              }
+            },
+            {
+              id: '2', 
+              bidderId: 'bidder2',
+              amount: property.price + 200000,
+              timestamp: new Date(Date.now() - 120000).toISOString(),
+              status: 'active' as const,
+              bidder: {
+                id: 'bidder2',
+                name: 'Priya Sharma',
+                email: 'priya@example.com', 
+                phone: '+91 87654 32109',
+                verified: true
+              }
+            }
+          ],
+          currentHighestBid: {
+            id: '2',
+            bidderId: 'bidder2', 
+            amount: property.price + 200000,
+            timestamp: new Date(Date.now() - 120000).toISOString(),
+            status: 'active' as const,
+            bidder: {
+              id: 'bidder2',
+              name: 'Priya Sharma',
+              email: 'priya@example.com',
+              phone: '+91 87654 32109', 
+              verified: true
+            }
+          }
+        };
+        setBiddingSession(mockSession);
+      }
     }
-  }, [id]);
+  }, [id, property]);
 
   useEffect(() => {
     if (!biddingSession || biddingSession.status === 'ended') return;
@@ -39,6 +100,9 @@ const BiddingManagement: React.FC = () => {
       } else {
         setTimeLeft('Ended');
         setBiddingSession(prev => prev ? {...prev, status: 'ended'} : null);
+        if (!acknowledged) {
+          setShowEndedOverlay(true);
+        }
       }
     }, 1000);
 
@@ -46,10 +110,16 @@ const BiddingManagement: React.FC = () => {
   }, [biddingSession]);
 
   const handleCloseBidding = () => {
-    if (biddingSession) {
+    if (biddingSession && !acknowledged) {
       setBiddingSession({...biddingSession, status: 'ended'});
+      setShowEndedOverlay(true);
       // In real app: API call to close bidding
     }
+  };
+
+  const handleAcknowledge = () => {
+    setShowEndedOverlay(false);
+    setAcknowledged(true);
   };
 
   const formatPrice = (price: number) => `₹${(price / 100000).toFixed(1)} Lakhs`;
@@ -80,7 +150,7 @@ const BiddingManagement: React.FC = () => {
       className="fixed inset-0 bg-background-light z-50 overflow-y-auto"
       style={{ paddingTop: '80px', paddingLeft: '64px' }}
     >
-      <div className="max-w-7xl mx-auto p-6">
+      <div className={`max-w-7xl mx-auto p-6 ${showEndedOverlay ? 'filter blur-sm pointer-events-none' : ''}`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <button
@@ -96,7 +166,7 @@ const BiddingManagement: React.FC = () => {
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(biddingSession.status)}`}>
               {biddingSession.status.charAt(0).toUpperCase() + biddingSession.status.slice(1)}
             </span>
-            {biddingSession.status === 'active' && (
+            {biddingSession.status === 'active' && !acknowledged && (
               <button
                 onClick={handleCloseBidding}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
@@ -135,8 +205,10 @@ const BiddingManagement: React.FC = () => {
               </div>
             </div>
 
+
+
             {/* Highest Bid Highlight */}
-            {biddingSession.currentHighestBid && (
+            {biddingSession.currentHighestBid && biddingSession.status !== 'ended' && (
               <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -335,7 +407,27 @@ const BiddingManagement: React.FC = () => {
             </div>
           </div>
         )}
+
       </div>
+
+      {/* Bidding Ended Overlay */}
+      {showEndedOverlay && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-70">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 className="text-2xl font-bold text-text-primary mb-2">Bidding has ended for this property</h2>
+            <p className="text-text-muted mb-6">The bidding period has concluded. You can review the final bids below.</p>
+            <button
+              onClick={handleAcknowledge}
+              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors font-medium"
+            >
+              Acknowledge
+            </button>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

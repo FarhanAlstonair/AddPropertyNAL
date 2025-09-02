@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { PropertyFormData, FormStepProps } from '../../types';
 import { availableCities } from '../../utils/mockData';
+import GoogleMap from '../GoogleMap';
 
 const LocationStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast }) => {
   const { register, formState: { errors }, trigger, watch, setValue } = useFormContext<PropertyFormData>();
@@ -9,7 +10,7 @@ const LocationStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast
   const coordinates = watch('coordinates');
 
   const handleNext = async () => {
-    const isValid = await trigger(['address', 'city']);
+    const isValid = await trigger(['address', 'city', 'state', 'pincode']);
     if (isValid) onNext();
   };
 
@@ -32,39 +33,86 @@ const LocationStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast
       </div>
 
       <div className="space-y-6">
-        {/* Address */}
+        {/* Free-Form Address Entry */}
         <div>
           <label className="block text-sm font-medium text-text-secondary mb-2">
-            Complete Address *
+            Property Address <span className="text-red-500">*</span>
           </label>
-          <textarea
-            {...register('address', { required: 'Address is required' })}
-            rows={3}
+          <input
+            type="text"
+            {...register('address', { required: '⚠ Please provide the property address.' })}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            placeholder="Enter complete address including street, area, landmarks..."
+            placeholder="Enter property address..."
           />
           {errors.address && (
             <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>
           )}
         </div>
 
-        {/* City */}
-        <div>
-          <label className="block text-sm font-medium text-text-secondary mb-2">
-            City *
-          </label>
-          <select
-            {...register('city', { required: 'City is required' })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-          >
-            <option value="">Select City</option>
-            {availableCities.map(city => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
-          {errors.city && (
-            <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>
-          )}
+        {/* Location Details Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              State *
+            </label>
+            <input
+              type="text"
+              {...register('state', { required: 'State is required' })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="e.g., Maharashtra"
+            />
+            {errors.state && (
+              <p className="mt-1 text-sm text-red-600">{errors.state.message}</p>
+            )}
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              City *
+            </label>
+            <select
+              {...register('city', { required: 'City is required' })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="">Select City</option>
+              {availableCities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+            {errors.city && (
+              <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>
+            )}
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              Pincode *
+            </label>
+            <input
+              type="text"
+              {...register('pincode', { 
+                required: 'Pincode is required',
+                pattern: { value: /^[0-9]{6}$/, message: 'Enter valid 6-digit pincode' }
+              })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="e.g., 400001"
+            />
+            {errors.pincode && (
+              <p className="mt-1 text-sm text-red-600">{errors.pincode.message}</p>
+            )}
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              Landmark
+            </label>
+            <input
+              type="text"
+              {...register('landmark')}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              placeholder="e.g., Near Metro Station"
+            />
+          </div>
         </div>
 
         {/* Coordinates Input */}
@@ -114,34 +162,30 @@ const LocationStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast
           )}
           
           <div className="text-sm text-text-muted">
-            Add coordinates for precise map location. If not provided, default India map will be shown.
+            Add coordinates for precise map location. If not provided, default map will show Bengaluru.
           </div>
         </div>
 
-        {/* Map Preview */}
+        {/* Interactive Map */}
         <div>
           <label className="block text-sm font-medium text-text-secondary mb-2">
-            Map Preview
+            Interactive Map - Click to set location
           </label>
-          <div className="bg-gray-100 border border-gray-300 rounded-lg overflow-hidden">
-            <div className="w-full h-64 flex items-center justify-center bg-gradient-to-br from-blue-100 to-green-100">
-              <div className="text-center p-6">
-                <svg className="mx-auto w-12 h-12 text-blue-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                </svg>
-                <div className="font-medium text-blue-900 mb-1">
-                  {coordinates?.lat && coordinates?.lng ? 'Property Location' : 'Default India Map'}
-                </div>
-                <div className="text-sm text-blue-700">
-                  {coordinates?.lat && coordinates?.lng 
-                    ? `Lat: ${coordinates.lat.toFixed(4)}, Lng: ${coordinates.lng.toFixed(4)}`
-                    : 'No coordinates provided - showing India map'
-                  }
-                </div>
-                <div className="text-xs text-blue-600 mt-2">Google Maps integration ready</div>
-              </div>
-            </div>
+          <div className="border border-gray-300 rounded-lg overflow-hidden">
+            <GoogleMap
+              address={watch('address')}
+              coordinates={coordinates || { lat: 12.9716, lng: 77.5946 }} // Default to Bengaluru
+              onLocationSelect={(location) => {
+                setValue('coordinates', { lat: location.lat, lng: location.lng });
+              }}
+              height="300px"
+            />
           </div>
+          {coordinates?.lat && coordinates?.lng && (
+            <p className="mt-2 text-sm text-green-600">
+              📍 Location set: {coordinates.lat.toFixed(4)}, {coordinates.lng.toFixed(4)}
+            </p>
+          )}
         </div>
 
         {/* Location Tips */}
