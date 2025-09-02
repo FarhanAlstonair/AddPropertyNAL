@@ -1,14 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { PropertyFormData, FormStepProps } from '../../types';
 import { availableCities } from '../../utils/mockData';
 
 const LocationStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast }) => {
-  const { register, formState: { errors }, trigger } = useFormContext<PropertyFormData>();
+  const { register, formState: { errors }, trigger, watch, setValue } = useFormContext<PropertyFormData>();
+  const [showCoordinates, setShowCoordinates] = useState(false);
+  const coordinates = watch('coordinates');
 
   const handleNext = async () => {
     const isValid = await trigger(['address', 'city']);
     if (isValid) onNext();
+  };
+
+  const handleCoordinateChange = (field: 'lat' | 'lng', value: string) => {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue)) {
+      setValue('coordinates', {
+        lat: coordinates?.lat || 0,
+        lng: coordinates?.lng || 0,
+        [field]: numValue
+      });
+    }
   };
 
   return (
@@ -54,30 +67,61 @@ const LocationStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast
           )}
         </div>
 
-        {/* Address Input with Auto-suggest */}
+        {/* Coordinates Input */}
         <div>
-          <label className="block text-sm font-medium text-text-secondary mb-2">
-            Search Address (Google Places)
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Start typing address for suggestions..."
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-            <svg className="absolute left-3 top-3.5 w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+          <div className="flex items-center justify-between mb-4">
+            <label className="block text-sm font-medium text-text-secondary">
+              Location Coordinates (Optional)
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowCoordinates(!showCoordinates)}
+              className="text-sm text-primary hover:underline"
+            >
+              {showCoordinates ? 'Hide' : 'Add'} Coordinates
+            </button>
           </div>
-          <div className="text-sm text-text-muted mt-1">
-            Google Places API integration ready for auto-complete
+          
+          {showCoordinates && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Latitude
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  placeholder="e.g., 19.0760"
+                  value={coordinates?.lat || ''}
+                  onChange={(e) => handleCoordinateChange('lat', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Longitude
+                </label>
+                <input
+                  type="number"
+                  step="any"
+                  placeholder="e.g., 72.8777"
+                  value={coordinates?.lng || ''}
+                  onChange={(e) => handleCoordinateChange('lng', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+            </div>
+          )}
+          
+          <div className="text-sm text-text-muted">
+            Add coordinates for precise map location. If not provided, default India map will be shown.
           </div>
         </div>
 
         {/* Map Preview */}
         <div>
           <label className="block text-sm font-medium text-text-secondary mb-2">
-            Location Preview
+            Map Preview
           </label>
           <div className="bg-gray-100 border border-gray-300 rounded-lg overflow-hidden">
             <div className="w-full h-64 flex items-center justify-center bg-gradient-to-br from-blue-100 to-green-100">
@@ -85,8 +129,15 @@ const LocationStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast
                 <svg className="mx-auto w-12 h-12 text-blue-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 </svg>
-                <div className="font-medium text-blue-900 mb-1">Interactive Map</div>
-                <div className="text-sm text-blue-700">Pin will appear here when address is selected</div>
+                <div className="font-medium text-blue-900 mb-1">
+                  {coordinates?.lat && coordinates?.lng ? 'Property Location' : 'Default India Map'}
+                </div>
+                <div className="text-sm text-blue-700">
+                  {coordinates?.lat && coordinates?.lng 
+                    ? `Lat: ${coordinates.lat.toFixed(4)}, Lng: ${coordinates.lng.toFixed(4)}`
+                    : 'No coordinates provided - showing India map'
+                  }
+                </div>
                 <div className="text-xs text-blue-600 mt-2">Google Maps integration ready</div>
               </div>
             </div>

@@ -5,6 +5,7 @@ import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
 import PropertyDetails from './pages/PropertyDetails';
 import AddProperty from './pages/AddProperty';
+import EditProperty from './pages/EditProperty';
 import BiddingManagement from './pages/BiddingManagement';
 
 const App: React.FC = () => {
@@ -17,6 +18,7 @@ const App: React.FC = () => {
           </Route>
           <Route path="/property/:id" element={<PropertyDetails />} />
           <Route path="/add-property" element={<AddProperty />} />
+          <Route path="/edit-property/:id" element={<EditProperty />} />
           <Route path="/bidding/:id" element={<BiddingManagement />} />
         </Routes>
       </Router>

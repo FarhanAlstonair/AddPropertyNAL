@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import ImageCarousel from '../components/ImageCarousel';
+import GoogleMap from '../components/GoogleMap';
 
 const PropertyDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { properties, selectedProperty, setSelectedProperty } = useApp();
+  const { properties, selectedProperty, setSelectedProperty, deleteProperty } = useApp();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -67,10 +70,16 @@ const PropertyDetails: React.FC = () => {
           </button>
 
           <div className="flex items-center space-x-3">
-            <button className="px-4 py-2 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
+            <button 
+              onClick={() => navigate(`/edit-property/${id}`)}
+              className="px-4 py-2 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition-colors"
+            >
               Edit Property
             </button>
-            <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+            <button 
+              onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
               Delete
             </button>
           </div>
@@ -174,32 +183,18 @@ const PropertyDetails: React.FC = () => {
             {/* Location Map */}
             <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-6">
               <h3 className="text-lg font-semibold text-text-primary mb-4">Location</h3>
-              <div className="bg-gray-100 border border-gray-300 rounded-lg overflow-hidden mb-4">
-                <div className="w-full h-64 flex items-center justify-center bg-gradient-to-br from-blue-100 to-green-100">
-                  <div className="text-center p-6">
-                    <svg className="mx-auto w-12 h-12 text-blue-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <div className="font-medium text-blue-900 mb-1">
-                      {selectedProperty.coordinates ? 'Property Location' : 'India Map View'}
-                    </div>
-                    <div className="text-sm text-blue-700">
-                      {selectedProperty.address}
-                    </div>
-                    <div className="text-xs text-blue-600 mt-2">
-                      Google Maps integration ready
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <GoogleMap 
+                coordinates={selectedProperty.coordinates}
+                address={selectedProperty.address}
+                className="w-full h-64 mb-4"
+              />
               
               <div className="text-center mb-4">
                 <div className="text-2xl font-bold text-primary mb-2">
                   {formatPrice(selectedProperty.price, selectedProperty.listingIntent)}
                 </div>
                 <div className="text-text-muted">
-                  {selectedProperty.listingIntent === 'rent' ? 'Monthly Rent' : selectedProperty.listingIntent === 'urgent-sale' ? 'Urgent Sale Price' : 'Total Price'}
+                  {selectedProperty.listingIntent === 'rent' ? 'Monthly Rent' : selectedProperty.listingIntent === 'urgent-sale' ? 'Urgent Sale Price' : 'Sale Price'}
                 </div>
               </div>
 
@@ -233,6 +228,53 @@ const PropertyDetails: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center mb-4">
+                <svg className="w-6 h-6 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <h3 className="text-lg font-semibold text-text-primary">Delete Property</h3>
+              </div>
+              <p className="text-text-secondary mb-6">
+                Are you sure you want to delete this property? This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-text-secondary rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setIsDeleting(true);
+                    try {
+                      deleteProperty(selectedProperty.id);
+                      navigate('/');
+                    } catch (error) {
+                      console.error('Failed to delete property:', error);
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  {isDeleting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    'Delete'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

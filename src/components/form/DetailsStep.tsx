@@ -2,7 +2,11 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { PropertyFormData, FormStepProps } from '../../types';
 
-const DetailsStep: React.FC<FormStepProps> = ({ onNext, isFirst, isLast }) => {
+interface DetailsStepProps extends FormStepProps {
+  isEdit?: boolean;
+}
+
+const DetailsStep: React.FC<DetailsStepProps> = ({ onNext, isFirst, isLast, isEdit }) => {
   const { register, formState: { errors }, trigger } = useFormContext<PropertyFormData>();
 
   const handleNext = async () => {
@@ -100,12 +104,18 @@ const DetailsStep: React.FC<FormStepProps> = ({ onNext, isFirst, isLast }) => {
               required: 'Price is required',
               min: { value: 1, message: 'Price must be greater than 0' }
             })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            disabled={isEdit}
+            className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${isEdit ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             placeholder="e.g., 8500000"
           />
           {errors.price && (
             <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
           )}
+          <div className={`mt-2 p-3 rounded-lg ${isEdit ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'}`}>
+            <p className={`text-sm ${isEdit ? 'text-red-800' : 'text-yellow-800'}`}>
+              <span className="font-medium">{isEdit ? 'Locked:' : 'Note:'}</span> {isEdit ? 'Property price cannot be changed after initial submission.' : 'Once you set the property price, it cannot be changed later.'}
+            </p>
+          </div>
         </div>
 
         {/* Description */}
