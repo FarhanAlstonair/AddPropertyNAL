@@ -803,6 +803,7 @@ a:hover {
   height: 100vh;
   border-right: 1px solid rgb(209, 206, 206);
   background: linear-gradient(135deg, var(--color-primary) 0%, #b9b9d1 100%);
+  background-color: white;
   color: white;
   transition: transform 0.3s ease;
   z-index: 1000;
@@ -935,7 +936,7 @@ a:hover {
 }
 
 .btn--primary {
-  background-color: var(--color-primary);
+  background-color:  rgb(62, 102, 244);
   color: var(--color-btn-primary-text);
 }
 
@@ -1308,7 +1309,7 @@ a:hover {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border);
+  border: 2px dashed  rgb(155, 155, 155);
 }
 
 .empty-state-icon {
