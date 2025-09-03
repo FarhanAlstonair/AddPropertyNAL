@@ -12,6 +12,7 @@ export const mockProperties: Property[] = [
     state: 'Maharashtra',
     pincode: '400001',
     landmark: 'Near Metro Station',
+    coordinates: { lat: 19.0760, lng: 72.8777 }, // Mumbai coordinates
     area: 1200,
     price: 8500000,
     listingIntent: 'sale',
@@ -40,6 +41,7 @@ export const mockProperties: Property[] = [
     state: 'Delhi',
     pincode: '110001',
     landmark: 'Green Valley Society',
+    coordinates: { lat: 28.6139, lng: 77.2090 }, // Delhi coordinates
     area: 2500,
     price: 45000,
     listingIntent: 'rent',
@@ -67,6 +69,7 @@ export const mockProperties: Property[] = [
     state: 'Karnataka',
     pincode: '560001',
     landmark: 'IT Hub Area',
+    coordinates: { lat: 12.9716, lng: 77.5946 }, // Bangalore coordinates
     area: 800,
     price: 12000000,
     listingIntent: 'urgent-sale',

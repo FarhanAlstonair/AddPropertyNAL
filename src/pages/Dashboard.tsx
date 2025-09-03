@@ -40,11 +40,7 @@ const Dashboard: React.FC = () => {
 
   // Show empty state if no properties exist at all
   if (properties.length === 0) {
-    return (
-      <div className="h-full flex">
-        <EmptyState onAddProperty={handleAddProperty} />
-      </div>
-    );
+    return <EmptyState onAddProperty={handleAddProperty} />;
   }
 
   return (
