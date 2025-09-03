@@ -5,7 +5,7 @@ import { PropertyFormData, FormStepProps } from '../../types';
 const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast }) => {
   const { setValue, watch, trigger, formState: { errors } } = useFormContext<PropertyFormData>();
   const [requiredDocuments, setRequiredDocuments] = useState<{ file: File; type: string; customType?: string }[]>([]);
-  const [documents, setDocuments] = useState<File[]>([]);
+
   const [selectedDocType, setSelectedDocType] = useState('');
   const [customDocType, setCustomDocType] = useState('');
   const [uploadError, setUploadError] = useState('');
@@ -66,24 +66,7 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
     e.target.value = '';
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    
-    // Validate file size (10MB limit)
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    const validFiles = files.filter(file => file.size <= maxSize);
-    const oversizedFiles = files.filter(file => file.size > maxSize);
-    
-    if (oversizedFiles.length > 0) {
-      setUploadError(`${oversizedFiles.length} file(s) exceed 10MB limit and were skipped.`);
-    }
-    
-    if (validFiles.length > 0) {
-      const updatedDocuments = [...documents, ...validFiles];
-      setDocuments(updatedDocuments);
-      setValue('documents', updatedDocuments);
-    }
-  };
+
 
   const removeRequiredDocument = (index: number) => {
     const newDocs = requiredDocuments.filter((_, i) => i !== index);
@@ -108,16 +91,10 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
     return coreTypes.filter(type => uploadedTypes.includes(type)).length >= 3;
   };
 
-  const removeDocument = (index: number) => {
-    const newDocuments = documents.filter((_, i) => i !== index);
-    setDocuments(newDocuments);
-    setValue('documents', newDocuments);
-  };
+
 
   const handleNext = async () => {
-    if (hasAllRequiredTypes() || requiredDocuments.length >= 3) {
-      onNext();
-    }
+    onNext();
   };
 
   return (
@@ -259,68 +236,7 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
           </div>
         </div>
 
-        {/* Additional Documents */}
-        <div>
-          <h3 className="text-lg font-semibold text-text-primary mb-4">Additional Documents (Optional)</h3>
-          
-          {/* File Upload Area */}
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
-          <input
-            type="file"
-            multiple
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-            onChange={handleFileChange}
-            className="hidden"
-            id="documents-upload"
-          />
-          <label htmlFor="documents-upload" className="cursor-pointer">
-            <svg className="mx-auto w-12 h-12 text-text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            <div className="text-lg font-medium text-text-primary mb-2">
-              Click to upload documents
-            </div>
-            <div className="text-text-muted">
-              PDF, DOC, DOCX, JPG, PNG files up to 10MB each
-            </div>
-          </label>
         </div>
-
-        {/* Uploaded Documents List */}
-        {documents.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="font-medium text-text-primary">Uploaded Documents ({documents.length})</h3>
-            <div className="space-y-2">
-              {documents.map((file, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-background-light rounded-lg">
-                  <div className="flex items-center">
-                    <svg className="w-5 h-5 text-text-muted mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <div>
-                      <div className="font-medium text-text-primary">{file.name}</div>
-                      <div className="text-sm text-text-muted">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeDocument(index)}
-                    className="text-red-600 hover:text-red-800 p-1"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        </div>
-      </div>
 
       {/* Navigation */}
       <div className="flex justify-between pt-6">
@@ -334,8 +250,7 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
         <button
           type="button"
           onClick={handleNext}
-          disabled={!hasAllRequiredTypes() && requiredDocuments.length < 3}
-          className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors font-medium"
         >
           Next: Intent
         </button>

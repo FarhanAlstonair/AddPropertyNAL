@@ -108,7 +108,7 @@ const PropertyDetails: React.FC = () => {
               </div>
 
               {/* Property Details Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                 <div className="text-center p-4 bg-background-light rounded-lg">
                   <div className="text-2xl font-bold text-primary">{selectedProperty.bhk}</div>
                   <div className="text-sm text-text-muted">Configuration</div>
@@ -125,6 +125,10 @@ const PropertyDetails: React.FC = () => {
                   <div className="text-2xl font-bold text-primary capitalize">{selectedProperty.listingIntent}</div>
                   <div className="text-sm text-text-muted">Listing Type</div>
                 </div>
+                <div className="text-center p-4 bg-background-light rounded-lg">
+                  <div className="text-2xl font-bold text-primary capitalize">{selectedProperty.sellerType || 'Owner'}</div>
+                  <div className="text-sm text-text-muted">Seller Type</div>
+                </div>
               </div>
 
               {/* Description */}
@@ -137,17 +141,130 @@ const PropertyDetails: React.FC = () => {
             </div>
 
             {/* Amenities */}
-            {selectedProperty.amenities.length > 0 && (
+            {(selectedProperty.amenities.length > 0 || (selectedProperty.customAmenities && selectedProperty.customAmenities.length > 0)) && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-text-primary mb-4">Amenities</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {selectedProperty.amenities.map((amenity, index) => (
-                    <div key={index} className="flex items-center">
-                      <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-text-secondary">{amenity}</span>
+                <div className="space-y-4">
+                  {selectedProperty.amenities.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-text-secondary mb-3">Standard Amenities</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {selectedProperty.amenities.map((amenity, index) => (
+                          <div key={index} className="flex items-center">
+                            <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-text-secondary">{amenity}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
+                  )}
+                  {selectedProperty.customAmenities && selectedProperty.customAmenities.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-text-secondary mb-3">Custom Amenities</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {selectedProperty.customAmenities.map((amenity, index) => (
+                          <div key={index} className="flex items-center">
+                            <svg className="w-5 h-5 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-text-secondary">{amenity}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Virtual Tour */}
+            {selectedProperty.virtualTour && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-text-primary mb-4">360° Virtual Tour</h3>
+                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                  <a 
+                    href={selectedProperty.virtualTour} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center text-primary hover:text-primary-dark transition-colors"
+                  >
+                    <svg className="w-16 h-16 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-lg font-medium">View 360° Tour</span>
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* Premium Image Gallery */}
+            {selectedProperty.imageCategories && Object.keys(selectedProperty.imageCategories).length > 0 && (
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
+                  <h3 className="text-xl font-bold text-text-primary flex items-center">
+                    <svg className="w-6 h-6 mr-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Premium Image Gallery
+                  </h3>
+                  <p className="text-sm text-text-muted mt-1">Explore property images organized by category</p>
+                </div>
+                <div className="p-6 space-y-8">
+                  {Object.entries(selectedProperty.imageCategories).map(([category, images]) => (
+                    images.length > 0 && (
+                      <div key={category} className="group">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-lg font-semibold text-text-primary flex items-center">
+                            <div className="w-2 h-2 bg-primary rounded-full mr-3"></div>
+                            {category}
+                            <span className="ml-2 px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                              {images.length} {images.length === 1 ? 'image' : 'images'}
+                            </span>
+                          </h4>
+                          {images.length > 4 && (
+                            <button className="text-primary hover:text-primary/80 text-sm font-medium flex items-center">
+                              View All
+                              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {images.slice(0, 4).map((image, index) => (
+                            <div key={index} className="relative group/image cursor-pointer overflow-hidden rounded-xl bg-gray-100">
+                              <img
+                                src={image}
+                                alt={`${category} ${index + 1}`}
+                                className="w-full h-32 object-cover transition-all duration-300 group-hover/image:scale-110"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-all duration-300"></div>
+                              <div className="absolute bottom-0 left-0 right-0 p-3 text-white transform translate-y-full group-hover/image:translate-y-0 transition-transform duration-300">
+                                <p className="text-sm font-medium">{category} {index + 1}</p>
+                              </div>
+                              <div className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-all duration-300">
+                                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                              </div>
+                            </div>
+                          ))}
+                          {images.length > 4 && (
+                            <div className="relative group/more cursor-pointer overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 border-2 border-dashed border-primary/30 hover:border-primary/50 transition-all duration-300">
+                              <div className="w-full h-32 flex flex-col items-center justify-center text-primary group-hover/more:scale-105 transition-transform duration-300">
+                                <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                <span className="text-sm font-semibold">+{images.length - 4}</span>
+                                <span className="text-xs opacity-75">more images</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
                   ))}
                 </div>
               </div>

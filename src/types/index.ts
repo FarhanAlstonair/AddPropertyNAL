@@ -14,8 +14,12 @@ export interface Property {
   listingIntent: 'rent' | 'sale' | 'urgent-sale';
   status: 'active' | 'sold' | 'rented' | 'draft';
   amenities: string[];
+  customAmenities?: string[];
   images: string[];
   videos?: string[];
+  virtualTour?: string;
+  imageCategories?: { [key: string]: string[] };
+  sellerType?: 'owner' | 'agent' | 'company';
   description: string;
   biddingEnabled?: boolean;
   coordinates?: { lat: number; lng: number };
@@ -39,11 +43,16 @@ export interface PropertyFormData {
   price: number;
   listingIntent: 'rent' | 'sale' | 'urgent-sale';
   amenities: string[];
+  customAmenities: string[];
+  sellerType: 'owner' | 'agent' | 'company';
   description: string;
   images: File[];
   videos: File[];
+  virtualTour: string;
+  imageCategories: { [key: string]: File[] };
   documents: File[];
   requiredDocuments: { file: File; type: string; customType?: string }[];
+  projectBrochure?: File;
   biddingEnabled: boolean;
   coordinates?: { lat: number; lng: number };
   termsAccepted: boolean;
@@ -79,4 +88,5 @@ export interface FormStepProps {
   onPrev: () => void;
   isFirst: boolean;
   isLast: boolean;
+  isEdit?: boolean;
 }
