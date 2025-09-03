@@ -88,4 +88,5 @@ export interface FormStepProps {
   onPrev: () => void;
   isFirst: boolean;
   isLast: boolean;
+  isEdit?: boolean;
 }

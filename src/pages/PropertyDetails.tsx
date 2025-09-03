@@ -199,29 +199,67 @@ const PropertyDetails: React.FC = () => {
               </div>
             )}
 
-            {/* Categorized Image Gallery */}
+            {/* Premium Image Gallery */}
             {selectedProperty.imageCategories && Object.keys(selectedProperty.imageCategories).length > 0 && (
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-text-primary mb-4">Image Gallery by Category</h3>
-                <div className="space-y-6">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-6 py-4 border-b border-gray-100">
+                  <h3 className="text-xl font-bold text-text-primary flex items-center">
+                    <svg className="w-6 h-6 mr-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Premium Image Gallery
+                  </h3>
+                  <p className="text-sm text-text-muted mt-1">Explore property images organized by category</p>
+                </div>
+                <div className="p-6 space-y-8">
                   {Object.entries(selectedProperty.imageCategories).map(([category, images]) => (
                     images.length > 0 && (
-                      <div key={category}>
-                        <h4 className="font-medium text-text-secondary mb-3">{category} ({images.length})</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div key={category} className="group">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-lg font-semibold text-text-primary flex items-center">
+                            <div className="w-2 h-2 bg-primary rounded-full mr-3"></div>
+                            {category}
+                            <span className="ml-2 px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                              {images.length} {images.length === 1 ? 'image' : 'images'}
+                            </span>
+                          </h4>
+                          {images.length > 4 && (
+                            <button className="text-primary hover:text-primary/80 text-sm font-medium flex items-center">
+                              View All
+                              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           {images.slice(0, 4).map((image, index) => (
-                            <div key={index} className="relative group cursor-pointer">
+                            <div key={index} className="relative group/image cursor-pointer overflow-hidden rounded-xl bg-gray-100">
                               <img
                                 src={image}
                                 alt={`${category} ${index + 1}`}
-                                className="w-full h-24 object-cover rounded-lg transition-transform group-hover:scale-105"
+                                className="w-full h-32 object-cover transition-all duration-300 group-hover/image:scale-110"
                               />
-                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg"></div>
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-all duration-300"></div>
+                              <div className="absolute bottom-0 left-0 right-0 p-3 text-white transform translate-y-full group-hover/image:translate-y-0 transition-transform duration-300">
+                                <p className="text-sm font-medium">{category} {index + 1}</p>
+                              </div>
+                              <div className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-all duration-300">
+                                <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                              </div>
                             </div>
                           ))}
                           {images.length > 4 && (
-                            <div className="w-full h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                              <span className="text-text-muted text-sm">+{images.length - 4} more</span>
+                            <div className="relative group/more cursor-pointer overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 border-2 border-dashed border-primary/30 hover:border-primary/50 transition-all duration-300">
+                              <div className="w-full h-32 flex flex-col items-center justify-center text-primary group-hover/more:scale-105 transition-transform duration-300">
+                                <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                <span className="text-sm font-semibold">+{images.length - 4}</span>
+                                <span className="text-xs opacity-75">more images</span>
+                              </div>
                             </div>
                           )}
                         </div>

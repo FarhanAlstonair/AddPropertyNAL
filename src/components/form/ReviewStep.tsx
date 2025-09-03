@@ -6,7 +6,7 @@ interface ReviewStepProps extends FormStepProps {
   onSubmit: (data: PropertyFormData) => void;
 }
 
-const ReviewStep: React.FC<ReviewStepProps> = ({ onPrev, onSubmit, isFirst, isLast }) => {
+const ReviewStep: React.FC<ReviewStepProps> = ({ onPrev, onSubmit, isFirst, isLast, isEdit }) => {
   const { watch, handleSubmit, register, formState: { errors } } = useFormContext<PropertyFormData>();
   const formData = watch();
 
@@ -158,8 +158,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ onPrev, onSubmit, isFirst, isLa
           </div>
         )}
 
-        {/* Required Documents Check */}
-        {(!formData.requiredDocuments || formData.requiredDocuments.length < 3) && (
+        {/* Required Documents Check - Only show in add mode */}
+        {!isEdit && (!formData.requiredDocuments || formData.requiredDocuments.length < 3) && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center">
               <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,10 +213,10 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ onPrev, onSubmit, isFirst, isLa
           <button
             type="button"
             onClick={handleSubmit(onSubmit)}
-            disabled={!formData.requiredDocuments || formData.requiredDocuments.length < 3 || !formData.termsAccepted}
+            disabled={isEdit ? !formData.termsAccepted : (!formData.requiredDocuments || formData.requiredDocuments.length < 3 || !formData.termsAccepted)}
             className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Submit Property
+            {isEdit ? 'Update Property' : 'Submit Property'}
           </button>
         </div>
       </div>

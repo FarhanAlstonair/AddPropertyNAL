@@ -17,7 +17,7 @@ import ReviewStep from '../components/form/ReviewStep';
 const steps: { key: FormStep; title: string; component: React.ComponentType<any> }[] = [
   { key: 'details', title: 'Details', component: DetailsStep },
   { key: 'documents', title: 'Documents', component: DocumentsStep },
-  { key: 'intent', title: 'Intent', component: IntentStep },
+  { key: 'intent', title: 'Amenities', component: IntentStep },
   { key: 'location', title: 'Location', component: LocationStep },
   { key: 'media', title: 'Media', component: MediaStep },
   { key: 'review', title: 'Review', component: ReviewStep }
