@@ -6,12 +6,12 @@ import { useSidebar } from '../hooks/useSidebar';
 
 const MainLayout: React.FC = () => {
   const { isExpanded, isMobile, toggle } = useSidebar();
-  const sidebarWidth = isExpanded ? 256 : 64;
+  const sidebarWidth = isExpanded ? 280 : 72;
 
   return (
     <div className="min-h-screen bg-background-light">
-      {/* Sidebar */}
-      <Sidebar isExpanded={isExpanded} onToggle={toggle} />
+      {/* Sidebar - Hidden on mobile */}
+      {!isMobile && <Sidebar isExpanded={isExpanded} onToggle={toggle} />}
       
       {/* Mobile Overlay */}
       {isMobile && isExpanded && (

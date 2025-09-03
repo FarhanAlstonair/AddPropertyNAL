@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import ImageCarousel from '../components/ImageCarousel';
 import GoogleMap from '../components/GoogleMap';
+import { formatIndianPrice } from '../utils/priceFormatter';
 
 const PropertyDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,12 +32,7 @@ const PropertyDetails: React.FC = () => {
     );
   }
 
-  const formatPrice = (price: number, intent: string) => {
-    if (intent === 'rent') {
-      return `₹${price.toLocaleString()}/month`;
-    }
-    return `₹${(price / 100000).toFixed(1)}L`;
-  };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -54,7 +50,7 @@ const PropertyDetails: React.FC = () => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
       className="fixed inset-0 bg-background-light z-50 overflow-y-auto"
-      style={{ paddingTop: '80px', paddingLeft: '64px' }}
+      style={{ paddingTop: '80px', paddingLeft: window.innerWidth < 768 ? '0px' : '72px' }}
     >
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
@@ -184,14 +180,15 @@ const PropertyDetails: React.FC = () => {
             <div className="border border-gray-200 rounded-lg shadow-sm overflow-hidden sticky top-6">
               <GoogleMap 
                 address={selectedProperty.address}
-                coordinates={selectedProperty.coordinates}
+                coordinates={selectedProperty.coordinates || { lat: 20.5937, lng: 78.9629 }} // Default to India center
                 height="450px"
+                zoom={selectedProperty.coordinates ? 15 : 5}
               />
               
               <div className="p-6 bg-white">
                 <div className="text-center mb-4">
                   <div className="text-2xl font-bold text-primary mb-2">
-                    {formatPrice(selectedProperty.price, selectedProperty.listingIntent)}
+                    {formatIndianPrice(selectedProperty.price, selectedProperty.listingIntent)}
                   </div>
                   <div className="text-text-muted">
                     {selectedProperty.listingIntent === 'rent' ? 'Monthly Rent' : selectedProperty.listingIntent === 'urgent-sale' ? 'Urgent Sale Price' : 'Sale Price'}

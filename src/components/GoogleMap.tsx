@@ -28,14 +28,14 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
       if (!mapRef.current || !isMounted) return;
       
       try {
-        // Use coordinates if provided, otherwise default to Bengaluru
+        // Use coordinates if provided, otherwise default to India center
         const center = (coordinates && coordinates.lat && coordinates.lng) 
           ? coordinates 
-          : { lat: 12.9716, lng: 77.5946 }; // Bengaluru, India
+          : { lat: 20.5937, lng: 78.9629 }; // India center
         
         const mapInstance = new google.maps.Map(mapRef.current, {
           center: center,
-          zoom: (coordinates && coordinates.lat && coordinates.lng) ? zoom : 12,
+          zoom: (coordinates && coordinates.lat && coordinates.lng) ? zoom : 5,
           mapTypeControl: true,
           streetViewControl: true,
           fullscreenControl: true,

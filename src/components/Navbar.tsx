@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSidebar } from '../hooks/useSidebar';
 
 interface NavbarProps {
   sidebarWidth: number;
@@ -10,6 +11,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ sidebarWidth, onMobileMenuToggle, showMobileMenu }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isMobile } = useSidebar();
 
   const getPageTitle = () => {
     if (location.pathname.includes('/property/')) return 'Property Details';
@@ -52,28 +54,41 @@ const Navbar: React.FC<NavbarProps> = ({ sidebarWidth, onMobileMenuToggle, showM
             <h1 className="text-xl font-semibold text-text-primary">{getPageTitle()}</h1>
           </div>
 
-          <div className="flex items-center space-x-4">
-            {/* Notifications */}
-            <button className="p-2 rounded-lg hover:bg-gray-100 relative">
-              <svg className="w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM10.07 2.82l3.93 3.93-3.93 3.93-3.93-3.93 3.93-3.93z" />
-              </svg>
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-            </button>
+          <div className="flex items-center space-x-2">
+            {/* Mobile Quick Actions */}
+            {isMobile && (
+              <>
+                <button
+                  onClick={() => navigate('/')}
+                  className="p-2 rounded-lg hover:bg-gray-100 text-text-muted hover:text-text-primary"
+                  title="Dashboard"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => navigate('/add-property')}
+                  className="p-2 rounded-lg hover:bg-gray-100 text-text-muted hover:text-primary"
+                  title="Add Property"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </>
+            )}
 
             {/* User Profile */}
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-medium">JA</span>
               </div>
-              <div className="hidden sm:block">
-                <span className="text-sm font-medium text-text-primary">John Anderson</span>
-              </div>
-              <button className="p-1 rounded hover:bg-gray-100">
-                <svg className="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+              {!isMobile && (
+                <div className="hidden sm:block">
+                  <span className="text-sm font-medium text-text-primary">John Anderson</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

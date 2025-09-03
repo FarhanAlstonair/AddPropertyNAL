@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { mockBiddingSessions } from '../utils/biddingData';
 import { BiddingSession, Bid } from '../types/bidding';
+import { formatIndianPrice } from '../utils/priceFormatter';
 
 const BiddingManagement: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -122,7 +123,7 @@ const BiddingManagement: React.FC = () => {
     setAcknowledged(true);
   };
 
-  const formatPrice = (price: number) => `₹${(price / 100000).toFixed(1)} Lakhs`;
+
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -148,7 +149,7 @@ const BiddingManagement: React.FC = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="fixed inset-0 bg-background-light z-50 overflow-y-auto"
-      style={{ paddingTop: '80px', paddingLeft: '64px' }}
+      style={{ paddingTop: '80px', paddingLeft: window.innerWidth < 768 ? '0px' : '72px' }}
     >
       <div className={`max-w-7xl mx-auto p-6 ${showEndedOverlay ? 'filter blur-sm pointer-events-none' : ''}`}>
         {/* Header */}
@@ -226,7 +227,7 @@ const BiddingManagement: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-primary">{formatPrice(biddingSession.currentHighestBid.amount)}</div>
+                    <div className="text-3xl font-bold text-primary">{formatIndianPrice(biddingSession.currentHighestBid.amount)}</div>
                     <button
                       onClick={() => setSelectedBidder(biddingSession.currentHighestBid?.bidderId || null)}
                       className="mt-2 px-3 py-1 border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors text-sm"
@@ -283,7 +284,7 @@ const BiddingManagement: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <div className="font-bold text-primary text-lg">{formatPrice(bid.amount)}</div>
+                        <div className="font-bold text-primary text-lg">{formatIndianPrice(bid.amount)}</div>
                       </div>
                       <button
                         onClick={() => setSelectedBidder(bid.bidderId)}
@@ -311,11 +312,11 @@ const BiddingManagement: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Starting Price</span>
-                  <span className="font-medium text-text-primary">{formatPrice(property.price)}</span>
+                  <span className="font-medium text-text-primary">{formatIndianPrice(property.price)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Min Bid Amount</span>
-                  <span className="font-medium text-text-primary">{formatPrice(biddingSession.minBidAmount)}</span>
+                  <span className="font-medium text-text-primary">{formatIndianPrice(biddingSession.minBidAmount)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-muted">Bid Increment</span>

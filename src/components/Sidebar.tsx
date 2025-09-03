@@ -11,7 +11,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isExpanded, onToggle }) => {
   return (
     <motion.div
       initial={false}
-      animate={{ width: isExpanded ? 256 : 64 }}
+      animate={{ width: isExpanded ? 280 : 72 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
       className="fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-40 flex flex-col"
     >

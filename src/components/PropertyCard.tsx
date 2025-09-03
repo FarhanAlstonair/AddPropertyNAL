@@ -1,5 +1,6 @@
 import React from 'react';
 import { Property } from '../types';
+import { formatIndianPrice } from '../utils/priceFormatter';
 
 interface PropertyCardProps {
   property: Property;
@@ -8,12 +9,7 @@ interface PropertyCardProps {
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick, onBidNow }) => {
-  const formatPrice = (price: number, intent: string) => {
-    if (intent === 'rent') {
-      return `₹${price.toLocaleString()}/month`;
-    }
-    return `₹${(price / 100000).toFixed(1)}L`;
-  };
+
 
   const getIntentColor = (intent: string) => {
     switch (intent) {
@@ -96,7 +92,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, onClick, onBidNow
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-semibold text-text-primary text-lg truncate">{property.title}</h3>
           <span className="text-primary font-bold text-lg ml-2">
-            {formatPrice(property.price, property.listingIntent)}
+            {formatIndianPrice(property.price, property.listingIntent)}
           </span>
         </div>
 
