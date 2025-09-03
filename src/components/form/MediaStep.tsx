@@ -3,15 +3,27 @@ import { useFormContext } from 'react-hook-form';
 import { PropertyFormData, FormStepProps } from '../../types';
 
 const MediaStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast }) => {
-  const { setValue, watch } = useFormContext<PropertyFormData>();
+  const { setValue, watch, register } = useFormContext<PropertyFormData>();
   const [images, setImages] = useState<File[]>([]);
   const [videos, setVideos] = useState<File[]>([]);
+  const [imageCategories, setImageCategories] = useState<{ [key: string]: File[] }>({});
+  const [selectedCategory, setSelectedCategory] = useState('Living Room');
+  
+  const categories = ['Living Room', 'Kitchen', 'Bedroom', 'Bathroom', 'Exterior', 'Other'];
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const newImages = [...images, ...files];
     setImages(newImages);
     setValue('images', newImages);
+    
+    // Add to selected category
+    const updatedCategories = {
+      ...imageCategories,
+      [selectedCategory]: [...(imageCategories[selectedCategory] || []), ...files]
+    };
+    setImageCategories(updatedCategories);
+    setValue('imageCategories', updatedCategories);
   };
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,9 +34,18 @@ const MediaStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast })
   };
 
   const removeImage = (index: number) => {
+    const imageToRemove = images[index];
     const newImages = images.filter((_, i) => i !== index);
     setImages(newImages);
     setValue('images', newImages);
+    
+    // Remove from categories
+    const updatedCategories = { ...imageCategories };
+    Object.keys(updatedCategories).forEach(category => {
+      updatedCategories[category] = updatedCategories[category].filter(img => img !== imageToRemove);
+    });
+    setImageCategories(updatedCategories);
+    setValue('imageCategories', updatedCategories);
   };
 
   const removeVideo = (index: number) => {
@@ -41,9 +62,38 @@ const MediaStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast })
       </div>
 
       <div className="space-y-8">
+        {/* Virtual Tour */}
+        <div>
+          <h3 className="text-lg font-semibold text-text-primary mb-4">360° Virtual Tour (Optional)</h3>
+          <p className="text-sm text-text-muted mb-4">Add a virtual tour link or upload 360° content</p>
+          
+          <input
+            type="url"
+            {...register('virtualTour')}
+            placeholder="https://example.com/virtual-tour or upload 360° file"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          />
+        </div>
+
         {/* Images Section */}
         <div>
           <h3 className="text-lg font-semibold text-text-primary mb-4">Property Images</h3>
+          
+          {/* Category Selection */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-text-secondary mb-2">
+              Select Category for Upload
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
           
           {/* Image Upload Area */}
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
@@ -60,7 +110,7 @@ const MediaStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast })
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div className="text-lg font-medium text-text-primary mb-2">
-                Click to upload images
+                Upload to {selectedCategory}
               </div>
               <div className="text-text-muted">
                 JPG, PNG, GIF up to 5MB each
@@ -68,35 +118,47 @@ const MediaStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast })
             </label>
           </div>
 
-          {/* Image Preview Grid */}
-          {images.length > 0 && (
-            <div className="mt-6">
-              <h4 className="font-medium text-text-primary mb-3">Uploaded Images ({images.length})</h4>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {images.map((file, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                    {index === 0 && (
-                      <div className="absolute bottom-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">
-                        Cover Photo
-                      </div>
-                    )}
+          {/* Categorized Image Preview */}
+          {Object.keys(imageCategories).length > 0 && (
+            <div className="mt-6 space-y-6">
+              {Object.entries(imageCategories).map(([category, categoryImages]) => (
+                categoryImages.length > 0 && (
+                  <div key={category}>
+                    <h4 className="font-medium text-text-primary mb-3">{category} ({categoryImages.length})</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {categoryImages.map((file, index) => {
+                        const globalIndex = images.indexOf(file);
+                        return (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`${category} ${index + 1}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(globalIndex)}
+                              className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                            {globalIndex === 0 && (
+                              <div className="absolute bottom-2 left-2 bg-primary text-white text-xs px-2 py-1 rounded">
+                                Cover Photo
+                              </div>
+                            )}
+                            <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-1 py-0.5 rounded">
+                              {category}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                ))}
-              </div>
+                )
+              ))}
             </div>
           )}
         </div>
@@ -170,8 +232,9 @@ const MediaStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLast })
           <h4 className="font-medium text-green-900 mb-2">Media Tips:</h4>
           <ul className="text-sm text-green-800 space-y-1">
             <li>• Upload high-quality, well-lit images</li>
-            <li>• Include photos of all rooms and key features</li>
+            <li>• Categorize images by room type for better organization</li>
             <li>• The first image will be used as the cover photo</li>
+            <li>• Add 360° virtual tour for immersive experience</li>
             <li>• Videos can showcase the property walkthrough</li>
             <li>• Avoid blurry or dark images</li>
           </ul>

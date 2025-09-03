@@ -10,7 +10,7 @@ const DetailsStep: React.FC<DetailsStepProps> = ({ onNext, isFirst, isLast, isEd
   const { register, formState: { errors }, trigger } = useFormContext<PropertyFormData>();
 
   const handleNext = async () => {
-    const isValid = await trigger(['title', 'type', 'bhk', 'area', 'price', 'description']);
+    const isValid = await trigger(['title', 'type', 'sellerType', 'bhk', 'area', 'price', 'description']);
     if (isValid) onNext();
   };
 
@@ -55,6 +55,25 @@ const DetailsStep: React.FC<DetailsStepProps> = ({ onNext, isFirst, isLast, isEd
           </select>
           {errors.type && (
             <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
+          )}
+        </div>
+
+        {/* Seller Type */}
+        <div>
+          <label className="block text-sm font-medium text-text-secondary mb-2">
+            Seller Type *
+          </label>
+          <select
+            {...register('sellerType', { required: 'Seller type is required' })}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="">Select Seller Type</option>
+            <option value="owner">Owner</option>
+            <option value="agent">Agent</option>
+            <option value="company">Company</option>
+          </select>
+          {errors.sellerType && (
+            <p className="mt-1 text-sm text-red-600">{errors.sellerType.message}</p>
           )}
         </div>
 

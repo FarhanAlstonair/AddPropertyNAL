@@ -40,11 +40,16 @@ const AddProperty: React.FC = () => {
       price: 0,
       listingIntent: 'sale',
       amenities: [],
+      customAmenities: [],
+      sellerType: 'owner',
       description: '',
       images: [],
       videos: [],
+      virtualTour: '',
+      imageCategories: {},
       documents: [],
       requiredDocuments: [],
+      projectBrochure: undefined,
       biddingEnabled: false,
       state: '',
       pincode: '',
@@ -94,10 +99,16 @@ const AddProperty: React.FC = () => {
       setIsSubmitting(true);
       
       // Convert files to URLs for demo (in real app, upload to server first)
+      const imageCategories: { [key: string]: string[] } = {};
+      Object.entries(data.imageCategories || {}).forEach(([category, files]) => {
+        imageCategories[category] = files.map(file => URL.createObjectURL(file));
+      });
+      
       const propertyData = {
         ...data,
         images: data.images.map(file => URL.createObjectURL(file)),
         videos: data.videos?.map(file => URL.createObjectURL(file)) || [],
+        imageCategories,
         status: 'active' as const
       };
 

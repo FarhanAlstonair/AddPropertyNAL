@@ -21,11 +21,19 @@ export const api = {
   // Create new property
   createProperty: async (data: PropertyFormData): Promise<Property> => {
     await delay(800);
+    
+    // Convert File arrays to string arrays
+    const imageCategories: { [key: string]: string[] } = {};
+    Object.entries(data.imageCategories || {}).forEach(([category, files]) => {
+      imageCategories[category] = files.map(file => URL.createObjectURL(file));
+    });
+    
     const newProperty: Property = {
       id: Date.now().toString(),
       ...data,
       images: data.images.map(file => URL.createObjectURL(file)),
       videos: data.videos?.map(file => URL.createObjectURL(file)) || [],
+      imageCategories,
       status: 'active',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

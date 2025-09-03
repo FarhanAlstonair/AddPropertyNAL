@@ -6,6 +6,7 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
   const { setValue, watch, trigger, formState: { errors } } = useFormContext<PropertyFormData>();
   const [requiredDocuments, setRequiredDocuments] = useState<{ file: File; type: string; customType?: string }[]>([]);
   const [documents, setDocuments] = useState<File[]>([]);
+  const [projectBrochure, setProjectBrochure] = useState<File | null>(null);
   const [selectedDocType, setSelectedDocType] = useState('');
   const [customDocType, setCustomDocType] = useState('');
   const [uploadError, setUploadError] = useState('');
@@ -106,6 +107,25 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
     const uploadedTypes = getUploadedTypes();
     const coreTypes = requiredDocTypes.slice(0, -1); // Exclude 'Other (custom)'
     return coreTypes.filter(type => uploadedTypes.includes(type)).length >= 3;
+  };
+
+  const handleBrochureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        setUploadError('Brochure file size must be under 10MB');
+        return;
+      }
+      setProjectBrochure(file);
+      setValue('projectBrochure', file);
+      setUploadError('');
+    }
+  };
+
+  const removeBrochure = () => {
+    setProjectBrochure(null);
+    setValue('projectBrochure', undefined);
   };
 
   const removeDocument = (index: number) => {
@@ -257,6 +277,58 @@ const DocumentsStep: React.FC<FormStepProps> = ({ onNext, onPrev, isFirst, isLas
               ))}
             </ul>
           </div>
+        </div>
+
+        {/* Project Brochure */}
+        <div>
+          <h3 className="text-lg font-semibold text-text-primary mb-4">Project Brochure (Optional)</h3>
+          <p className="text-sm text-text-muted mb-4">Upload project brochure or marketing material</p>
+          
+          <div className="border-2 border-dashed border-blue-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleBrochureChange}
+              className="hidden"
+              id="brochure-upload"
+            />
+            <label htmlFor="brochure-upload" className="cursor-pointer">
+              <svg className="mx-auto w-10 h-10 text-blue-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <div className="text-base font-medium text-blue-700 mb-1">
+                Upload Project Brochure
+              </div>
+              <div className="text-sm text-blue-600">
+                PDF files up to 10MB
+              </div>
+            </label>
+          </div>
+
+          {projectBrochure && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <div>
+                  <div className="font-medium text-text-primary">{projectBrochure.name}</div>
+                  <div className="text-sm text-text-muted">
+                    {(projectBrochure.size / 1024 / 1024).toFixed(2)} MB
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={removeBrochure}
+                className="text-red-600 hover:text-red-800 p-1"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Additional Documents */}

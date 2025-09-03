@@ -42,11 +42,16 @@ const EditProperty: React.FC = () => {
       price: 0,
       listingIntent: 'sale',
       amenities: [],
+      customAmenities: [],
+      sellerType: 'owner',
       description: '',
       images: [],
       videos: [],
+      virtualTour: '',
+      imageCategories: {},
       documents: [],
       requiredDocuments: [],
+      projectBrochure: undefined,
       biddingEnabled: false,
       state: '',
       pincode: '',
@@ -67,7 +72,10 @@ const EditProperty: React.FC = () => {
       methods.setValue('price', property.price);
       methods.setValue('listingIntent', property.listingIntent);
       methods.setValue('amenities', property.amenities);
+      methods.setValue('customAmenities', property.customAmenities || []);
+      methods.setValue('sellerType', property.sellerType || 'owner');
       methods.setValue('description', property.description);
+      methods.setValue('virtualTour', property.virtualTour || '');
       methods.setValue('biddingEnabled', property.biddingEnabled || false);
       methods.setValue('coordinates', property.coordinates);
       methods.setValue('state', property.state || '');
@@ -95,12 +103,18 @@ const EditProperty: React.FC = () => {
     try {
       setIsSubmitting(true);
       
-      // Update property (price remains locked)
+      // Update property (price and documents remain locked)
+      const imageCategories: { [key: string]: string[] } = {};
+      Object.entries(data.imageCategories || {}).forEach(([category, files]) => {
+        imageCategories[category] = files.map(file => URL.createObjectURL(file));
+      });
+      
       const updatedData = {
         ...data,
-        price: property.price, // Keep original price
+        price: property.price, // Keep original price (locked)
         images: data.images.length > 0 ? data.images.map(file => URL.createObjectURL(file)) : property.images,
-        videos: data.videos?.length > 0 ? data.videos.map(file => URL.createObjectURL(file)) : property.videos
+        videos: data.videos?.length > 0 ? data.videos.map(file => URL.createObjectURL(file)) : property.videos,
+        imageCategories: Object.keys(imageCategories).length > 0 ? imageCategories : property.imageCategories
       };
 
       updateProperty(property.id, updatedData);
